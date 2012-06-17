@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2012 ARM Limited. All rights reserved.
+ * Copyright (C) 2010-2011 ARM Limited. All rights reserved.
  * 
  * This program is free software and is provided to you under the terms of the GNU General Public License version 2
  * as published by the Free Software Foundation, and any use by you of this program is subject to the terms of such GNU licence.
@@ -457,6 +457,11 @@ typedef struct
     u32 heap_current_addr;          /**< [out] value of the GP PLB PL heap start address register */
     u32 perf_counter0;              /**< [out] value of perfomance counter 0 (see ARM DDI0415A) */
     u32 perf_counter1;              /**< [out] value of perfomance counter 1 (see ARM DDI0415A) */
+    u32 render_time;                /**< [out] number of milliseconds it took for the job to render */
+	u32 perf_counter_l2_src0;       /**< [out] soruce id for Mali-400 MP L2 cache performance counter 0 */
+	u32 perf_counter_l2_src1;       /**< [out] soruce id for Mali-400 MP L2 cache performance counter 1 */
+	u32 perf_counter_l2_val0;       /**< [out] Value of the Mali-400 MP L2 cache performance counter 0 */
+	u32 perf_counter_l2_val1;       /**< [out] Value of the Mali-400 MP L2 cache performance counter 1 */
 } _mali_uk_gp_job_finished_s;
 
 typedef enum _maligp_job_suspended_reason
@@ -542,17 +547,33 @@ typedef struct
     u32 perf_counter_flag;              /**< [in] bitmask indicating which performance counters to enable, see \ref _MALI_PERFORMANCE_COUNTER_FLAG_SRC0_ENABLE and related macro definitions */
     u32 perf_counter_src0;              /**< [in] source id for performance counter 0 (see ARM DDI0415A, Table 3-60) */
     u32 perf_counter_src1;              /**< [in] source id for performance counter 1 (see ARM DDI0415A, Table 3-60) */
-	u32 frame_builder_id;               /**< [in] id of the originating frame builder */
-	u32 flush_id;                       /**< [in] flush id within the originating frame builder */
+    u32 returned_user_job_ptr;          /**< [out] identifier for the returned job in user space */
+    _mali_uk_start_job_status status;   /**< [out] indicates job start status (success, previous job returned, requeue) */
+	u32 abort_id;                       /**< [in] abort id of this job, used to identify this job for later abort requests */
+	u32 perf_counter_l2_src0;           /**< [in] soruce id for Mali-400 MP L2 cache performance counter 0 */
+	u32 perf_counter_l2_src1;           /**< [in] source id for Mali-400 MP L2 cache performance counter 1 */
+	u32 frame_builder_id;				/**< [in] id of the originating frame builder */
+	u32 flush_id;						/**< [in] flush id within the originating frame builder */
 } _mali_uk_pp_start_job_s;
 /** @} */ /* end group _mali_uk_ppstartjob_s */
 
 typedef struct
 {
-    u32 user_job_ptr;                          /**< [out] identifier for the job in user space */
-    _mali_uk_job_status status;                /**< [out] status of finished job */
-    u32 perf_counter0[_MALI_PP_MAX_SUB_JOBS];  /**< [out] value of perfomance counter 0 (see ARM DDI0415A), one for each sub job */
-    u32 perf_counter1[_MALI_PP_MAX_SUB_JOBS];  /**< [out] value of perfomance counter 1 (see ARM DDI0415A), one for each sub job */
+    u32 user_job_ptr;               /**< [out] identifier for the job in user space */
+    _mali_uk_job_status status;     /**< [out] status of finished job */
+    u32 irq_status;                 /**< [out] value of interrupt rawstat register (see ARM DDI0415A) */
+    u32 last_tile_list_addr;        /**< [out] value of renderer list register (see ARM DDI0415A); necessary to restart a stopped job */
+    u32 perf_counter_src0;          /**< [out] source id for performance counter 0 (see ARM DDI0415A, Table 3-60) */
+    u32 perf_counter_src1;          /**< [out] source id for performance counter 1 (see ARM DDI0415A, Table 3-60) */
+    u32 perf_counter0;              /**< [out] value of perfomance counter 0 (see ARM DDI0415A) */
+    u32 perf_counter1;              /**< [out] value of perfomance counter 1 (see ARM DDI0415A) */
+    u32 render_time;                /**< [out] number of milliseconds it took for the job to render */
+	u32 perf_counter_l2_src0;       /**< [out] soruce id for Mali-400 MP L2 cache performance counter 0 */
+	u32 perf_counter_l2_src1;       /**< [out] soruce id for Mali-400 MP L2 cache performance counter 1 */
+	u32 perf_counter_l2_val0;       /**< [out] Value of the Mali-400 MP L2 cache performance counter 0 */
+	u32 perf_counter_l2_val1;       /**< [out] Value of the Mali-400 MP L2 cache performance counter 1 */
+	u32 perf_counter_l2_val0_raw;   /**< [out] Raw value of the Mali-400 MP L2 cache performance counter 0 */
+	u32 perf_counter_l2_val1_raw;   /**< [out] Raw value of the Mali-400 MP L2 cache performance counter 1 */
 } _mali_uk_pp_job_finished_s;
 
 /**
@@ -761,7 +782,7 @@ typedef struct
  * The 16bit integer is stored twice in a 32bit integer
  * For example, for version 1 the value would be 0x00010001
  */
-#define _MALI_API_VERSION 14
+#define _MALI_API_VERSION 9
 #define _MALI_UK_API_VERSION _MAKE_VERSION_ID(_MALI_API_VERSION)
 
 /**
@@ -1018,6 +1039,13 @@ typedef struct
 {
 	void *ctx;                      /**< [in,out] user-kernel context (trashed on output) */
 } _mali_uk_profiling_clear_s;
+
+typedef struct
+{
+	void *ctx;                      /**< [in,out] user-kernel context (trashed on output) */
+	u32 enable_events;              /**< [out] 1 if user space process should generate events, 0 if not */
+} _mali_uk_profiling_get_config_s;
+
 
 /** @} */ /* end group _mali_uk_gp */
 

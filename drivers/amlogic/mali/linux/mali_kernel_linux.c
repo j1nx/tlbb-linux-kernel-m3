@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2012 ARM Limited. All rights reserved.
+ * Copyright (C) 2010-2011 ARM Limited. All rights reserved.
  * 
  * This program is free software and is provided to you under the terms of the GNU General Public License version 2
  * as published by the Free Software Foundation, and any use by you of this program is subject to the terms of such GNU licence.
@@ -152,22 +152,12 @@ void mali_driver_exit(void)
 	MALI_DEBUG_PRINT(2, ("\n"));
 	MALI_DEBUG_PRINT(2, ("Unloading Mali v%d device driver.\n",_MALI_API_VERSION));
 
-	/* No need to terminate sysfs, this will be done automatically along with device termination */
-
-	mali_terminate_subsystems();
-
-	mali_osk_low_level_mem_term();
-
-	mali_platform_deinit();
-
-	terminate_kernel_device();
-	_mali_dev_platform_unregister();
-
+#if USING_MALI_PMM
 #if MALI_LICENSE_IS_GPL
-	/* @@@@ clean up the work queues! This should not be terminated here, since it isn't inited in the function above! */
-	flush_workqueue(mali_wq);
-	destroy_workqueue(mali_wq);
-	mali_wq = NULL;
+#ifdef CONFIG_PM
+	_mali_dev_platform_unregister();
+#endif
+#endif
 #endif
 
 	MALI_PRINT(("Mali device driver unloaded\n"));

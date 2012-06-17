@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2012 ARM Limited. All rights reserved.
+ * Copyright (C) 2010-2011 ARM Limited. All rights reserved.
  * 
  * This program is free software and is provided to you under the terms of the GNU General Public License version 2
  * as published by the Free Software Foundation, and any use by you of this program is subject to the terms of such GNU licence.
@@ -8,12 +8,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef __MALI_MEM_VALIDATION_H__
-#define __MALI_MEM_VALIDATION_H__
+#ifndef __MALI_KERNEL_GP2_H__
+#define __MALI_KERNEL_GP2_H__
 
-#include "mali_osk.h"
+extern struct mali_kernel_subsystem mali_subsystem_gp2;
 
-_mali_osk_errcode_t mali_mem_validation_add_range(const _mali_osk_resource_t * resource);
-_mali_osk_errcode_t mali_mem_validation_check(u32 phys_addr, u32 size);
+#if USING_MALI_PMM
+_mali_osk_errcode_t maligp_signal_power_up( mali_bool queue_only );
+_mali_osk_errcode_t maligp_signal_power_down( mali_bool immediate_only );
+#endif
 
-#endif /* __MALI_MEM_VALIDATION_H__ */
+#endif /* __MALI_KERNEL_GP2_H__ */

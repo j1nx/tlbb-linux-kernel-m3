@@ -186,6 +186,7 @@ static int block_allocator_allocate(void* ctx, ump_dd_mem * mem)
 
 		mem->block_array[i].addr = get_phys(allocator, block);
 		mem->block_array[i].size = UMP_BLOCK_SIZE;
+		memset(phys_to_virt(mem->block_array[i].addr), 0, UMP_BLOCK_SIZE);
 		mem->size_bytes += UMP_BLOCK_SIZE;
 
 		i++;

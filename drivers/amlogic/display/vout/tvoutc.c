@@ -214,6 +214,7 @@ int tvoutc_setclk(tvmode_t mode)
 		case TVMODE_1080I_50HZ:
 		case TVMODE_1080P:
 		case TVMODE_1080P_50HZ:
+		case TVMODE_1080P_24HZ:
 			  setreg(&hd[xtal]);
 			  if(xtal == 1)
 			  {
@@ -247,9 +248,9 @@ int tvoutc_setmode(tvmode_t mode)
 			
     while (MREG_END_MARKER != s->reg)
         setreg(s++);
-	//tvoutc_setclk(mode);
-    //enable_vsync_interrupt();
-    set_tvmode_misc(mode);
+	tvoutc_setclk(mode);
+        enable_vsync_interrupt();
+        set_tvmode_misc(mode);
 #ifdef CONFIG_AM_VIDEO2
 	switch(mode)
 	{
@@ -267,7 +268,8 @@ int tvoutc_setmode(tvmode_t mode)
 		case TVMODE_1080I_50HZ: //??
 		case TVMODE_1080P:
 		case TVMODE_1080P_50HZ:
-        WRITE_CBUS_REG_BITS(VPU_VIU_VENC_MUX_CTRL, 2, 0, 2); //reg0x271a, select ENCP to VIU1
+        	case TVMODE_1080P_24HZ:
+	WRITE_CBUS_REG_BITS(VPU_VIU_VENC_MUX_CTRL, 2, 0, 2); //reg0x271a, select ENCP to VIU1
         break;		    
 		default:
 			printk(KERN_ERR "unsupport tv mode,video clk is not set!!\n");	

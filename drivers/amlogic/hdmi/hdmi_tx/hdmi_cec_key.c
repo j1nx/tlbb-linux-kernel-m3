@@ -41,7 +41,7 @@ unsigned int cec_key_flag =0;
 
 __u16 cec_key_map[128] = {
     KEY_ENTER, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, 0 , 0 , 0 ,//0x00
-    0 , KEY_HOMEPAGE , KEY_MENU, 0, 0, KEY_ESC, 0, 0,
+    0 , KEY_HOMEPAGE , KEY_MENU, 0, 0, KEY_BACKSPACE, 0, 0,
     0 , 0, 0, 0, 0, 0, 0, 0,//0x10
     0 , 0, 0, 0, 0, 0, 0, 0,
     KEY_0 , KEY_1, KEY_2, KEY_3,KEY_4, KEY_5, KEY_6, KEY_7,//0x20

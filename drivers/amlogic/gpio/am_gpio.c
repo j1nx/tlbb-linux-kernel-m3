@@ -53,10 +53,10 @@ static void set_power_led_onoff(char *onoff)// 1:on; 0:off
 {
     /* GPIO AO_10 */
     if (0 == strcmp(onoff, "powerkey led on")) { //led on
-        set_gpio_val(GPIOAO_bank_bit0_11(10), GPIOAO_bit_bit0_11(10), 1);
+        set_gpio_val(GPIOAO_bank_bit0_11(10), GPIOAO_bit_bit0_11(10), 0);
         set_gpio_mode(GPIOAO_bank_bit0_11(10), GPIOAO_bit_bit0_11(10), GPIO_OUTPUT_MODE);
     } else {
-        set_gpio_val(GPIOAO_bank_bit0_11(10), GPIOAO_bit_bit0_11(10), 0);
+        set_gpio_val(GPIOAO_bank_bit0_11(10), GPIOAO_bit_bit0_11(10), 1);
         set_gpio_mode(GPIOAO_bank_bit0_11(10), GPIOAO_bit_bit0_11(10), GPIO_OUTPUT_MODE);
     }
 }
@@ -113,9 +113,9 @@ static inline int _gpio_setup_bank_bit(cmd_t  *op)
             return -1;
         }
         break;
-    case 'o': //bank ao
-        if (op->bit < 12) { //bit0..11 ,bit no change .
-            op->bank = GPIOAO_bank_bit0_11(0); //bit 0..11
+    case 'o': //bank o
+        if (op->bit < 12) { //bit0..22 ,bit no change .
+            op->bank = GPIOAO_bank_bit0_11(0); //bit 0..15 16..21 share one bank
 	    op->bit  = GPIOAO_bit_bit0_11(op->bit);
 		} else {
             return -1;
@@ -123,7 +123,7 @@ static inline int _gpio_setup_bank_bit(cmd_t  *op)
         break;
 	/* FIXME AO/BOOT/CARD GPIO can not controle todo */
     default:
-	printk("GPIO, invalid selection.\n");
+	printk("GPIO, inval select.\n");
 	return -1;
     }
     return 0;

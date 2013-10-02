@@ -1,8 +1,7 @@
 menu "Mali GPU OpenGL device driver"
 config MALI400
-	tristate "Mali support"
-	depends on m
-	default m
+	tristate "Mali-300/400/450 support"
+	depends on ARM
 	select FB
 	---help---
 	  This enables support for the Mali-300, Mali-400, and Mali-450 GPUs.
@@ -29,6 +28,5 @@ config MALI400_GPU_UTILIZATION
 	---help---
 	  This enables gathering and processing of the utilization of Mali GPU.
 	  This data can be used as a basis to change GPU operating frequency.
-	  
-endmenu
 
+endmenu

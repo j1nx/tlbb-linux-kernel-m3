@@ -38,6 +38,7 @@ struct mali_pp_slot
 	 * so we don't need to take the group lock so often (and also avoid clutter with the working lock)
 	 */
 	enum mali_pp_slot_state state;
+	struct mali_session_data *session;
 };
 
 static u32 pp_version = 0;
@@ -182,6 +183,53 @@ static void mali_pp_scheduler_schedule(void)
 	}
 #endif
 
+	return MALI_FALSE;
+}
+
+static void mali_pp_scheduler_schedule(void)
+{
+	u32 i;
+	struct mali_pp_job *job;
+#if MALI_PP_SCHEDULER_FORCE_NO_JOB_OVERLAP_BETWEEN_APPS
+	struct mali_session_data * session;
+#endif
+
+	MALI_ASSERT_PP_SCHEDULER_LOCKED();
+
+	if (0 < pause_count || 0 == num_slots_idle || _mali_osk_list_empty(&job_queue))
+	{
+		MALI_DEBUG_PRINT(4, ("Mali PP scheduler: Nothing to schedule (paused=%u, idle slots=%u)\n",
+		                     pause_count, num_slots_idle));
+		return; /* Nothing to do, so early out */
+	}
+
+
+#if MALI_PP_SCHEDULER_FORCE_NO_JOB_OVERLAP
+	if ( num_slots_idle < num_slots )
+	{
+		MALI_DEBUG_PRINT(4, ("Mali PP scheduler: Job not started, since only %d/%d cores are available\n", num_slots_idle,num_slots));
+		return;
+	}
+#endif
+
+#if MALI_PP_SCHEDULER_FORCE_NO_JOB_OVERLAP_BETWEEN_APPS
+	/* Finding initial session for the PP cores */
+	job = _MALI_OSK_LIST_ENTRY(job_queue.next, struct mali_pp_job, list);
+	session = job->session;
+	if ( num_slots != num_slots_idle )
+	{
+		for (i = 0; (i < num_slots) ; i++)
+		{
+			if ( slots[i].state == MALI_PP_SLOT_STATE_IDLE )
+			{
+				continue;
+			}
+			session = mali_group_get_session(slots[i].group);
+			break;
+		}
+	}
+#endif
+
 	for (i = 0; (i < num_slots) && (0 < num_slots_idle); i++)
 	{
 		u32 sub_job;
@@ -198,6 +246,22 @@ static void mali_pp_scheduler_schedule(void)
 
 		job = _MALI_OSK_LIST_ENTRY(job_queue.next, struct mali_pp_job, list);
 		MALI_DEBUG_ASSERT(mali_pp_job_has_unstarted_sub_jobs(job)); /* All jobs on the job_queue should have unstarted sub jobs */
+
+		#if MALI_PP_SCHEDULER_KEEP_SUB_JOB_STARTS_ALIGNED
+		if ( (0==job->sub_jobs_started) && (num_slots_idle < num_slots) && (job->sub_job_count > num_slots_idle))
+		{
+			if (MALI_TRUE == mali_pp_scheduler_session_has_running_jobs(mali_pp_job_get_session(job)))
+			{
+				/* There is already a running job from this session, so we need to enforce the barrier */
+				return;
+			}
+			else
+			{
+				/* Barrier is now enforced, update job object so we don't delay execution of sub-jobs */
+				mali_pp_job_barrier_enforced(job);
+			}
+		}
+		#endif
 
 		#if MALI_PP_SCHEDULER_KEEP_SUB_JOB_STARTS_ALIGNED
 		if ( (0==job->sub_jobs_started) && (num_slots_idle < num_slots) && (job->sub_job_count > num_slots_idle))
@@ -227,6 +291,7 @@ static void mali_pp_scheduler_schedule(void)
 
 			/* Mark slot as busy */
 			slots[i].state = MALI_PP_SLOT_STATE_WORKING;
+			slots[i].session =  mali_pp_job_get_session(job);
 			num_slots_idle--;
 
 			if (!mali_pp_job_has_unstarted_sub_jobs(job))
@@ -313,6 +378,7 @@ void mali_pp_scheduler_job_done(struct mali_group *group, struct mali_pp_job *jo
 		{
 			MALI_DEBUG_ASSERT(MALI_PP_SLOT_STATE_WORKING == slots[i].state);
 			slots[i].state = MALI_PP_SLOT_STATE_IDLE;
+			slots[i].session = NULL;
 			num_slots_idle++;
 			mali_pp_job_mark_sub_job_completed(job, success);
 		}

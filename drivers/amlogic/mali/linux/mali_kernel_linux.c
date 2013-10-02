@@ -29,6 +29,7 @@
 #include "mali_kernel_sysfs.h"
 #include "mali_platform.h"
 #include "mali_kernel_license.h"
+#include "mali_dma_buf.h"
 
 /* Streamline support for the Mali driver */
 #if defined(CONFIG_TRACEPOINTS) && MALI_TIMELINE_PROFILING_ENABLED

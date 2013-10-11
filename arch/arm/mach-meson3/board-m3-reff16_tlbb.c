@@ -87,6 +87,50 @@
 #include <linux/efuse.h>
 #endif
 
+#if defined(CONFIG_LEDS_GPIO)
+#include <linux/leds.h>
+#endif
+
+/* GPIO Defines */
+// LEDS
+#define GPIO_LED_STATUS GPIO_AO(10)
+#define GPIO_LED_POWER GPIO_AO(11)
+
+#if defined(CONFIG_LEDS_GPIO)
+/* LED Class Support for the leds */
+static struct gpio_led aml_led_pins[] = {
+  {
+    .name     = "Powerled",
+    .default_trigger = "default-on",
+    .gpio     = GPIO_LED_POWER,
+    .active_low   = 0,
+  },
+  {
+    .name     = "Statusled",
+#if defined(CONFIG_LEDS_TRIGGER_REMOTE_CONTROL)
+    .default_trigger = "rc", 
+#else
+    .default_trigger = "none",
+#endif    
+    .gpio     = GPIO_LED_STATUS,
+    .active_low   = 1,
+  },
+};
+
+static struct gpio_led_platform_data aml_led_data = {
+  .leds    = aml_led_pins,
+  .num_leds = ARRAY_SIZE(aml_led_pins),
+};
+
+static struct platform_device aml_leds = {
+  .name  = "leds-gpio",
+  .id  = -1,
+  .dev  = {
+    .platform_data  = &aml_led_data,
+  }
+};
+#endif
+
 #ifdef CONFIG_AML_HDMI_TX
 #include <linux/hdmi/hdmi_config.h>
 #endif
@@ -2657,6 +2701,9 @@ static struct platform_device __initdata *platform_devs[] = {
 #endif
 #if defined(CONFIG_AML_HDMI_TX)
     &aml_hdmi_device,
+#endif
+#if defined(CONFIG_LEDS_GPIO)
+    &aml_leds,
 #endif
 #if defined(CONFIG_JPEGLOGO)
     &jpeglogo_device,

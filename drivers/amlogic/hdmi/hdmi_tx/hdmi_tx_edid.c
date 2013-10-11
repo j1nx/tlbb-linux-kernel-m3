@@ -1257,7 +1257,7 @@ static dispmode_vic_t dispmode_VIC_tab[]=
     {"720p", HDMI_720p60},
     {"1080i", HDMI_1080i60},
     {"1080p", HDMI_1080p60},
-    {"1080P30", HDMI_1080p30},
+    {"1080p30hz", HDMI_1080p30},
     {"1080p24hz", HDMI_1080p24},
     {"720p50hz", HDMI_720p50},
     {"1080i50hz", HDMI_1080i50},

@@ -611,34 +611,34 @@ static struct mtd_partition multi_partition_info_1G_or_More[] =
 {
 #ifdef CONFIG_AML_NAND_ENV
     {
-	.name = "ubootenv",
-	.offset = 8*1024*1024,
+	.name = "boot_env",
+	.offset = (12)*1024*1024,
 	.size = 4*1024*1024,
     },
 #endif
     {
 	.name = "aml_logo",
-	.offset = 12*1024*1024,
+	.offset = (16)*1024*1024,
 	.size = 16*1024*1024,
     },
     {
         .name = "recovery",
-        .offset = 28*1024*1024,
+        .offset = (16+16)*1024*1024,
         .size = 16*1024*1024,
     },
     {
         .name = "boot",
-        .offset = 44*1024*1024,
+        .offset = (16+16+16)*1024*1024,
         .size = 20*1024*1024,
     },
 	{
         .name = "system",
-        .offset = 64*1024*1024,
+        .offset = (16+16+16+20)*1024*1024,
         .size = 512*1024*1024,
     },
     {
         .name = "cache",
-        .offset = 576*1024*1024,
+        .offset = (16+16+16+20+512)*1024*1024,
         .size = 192*1024*1024,
     },
 #ifdef CONFIG_AML_NFTL

@@ -1060,7 +1060,7 @@ CONFIG_CMEM=m
 #
 # Mali GPU OpenGL device driver
 #
-# CONFIG_MALI400 is not set
+CONFIG_MALI400=m
 
 #
 # AMLOGIC Post Process Manager driver
